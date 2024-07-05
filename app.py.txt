@@ -1,0 +1,55 @@
+import streamlit as st
+import matplotlib.pyplot as plt
+
+def calculate_lighting_cost(watt, hours):
+    cost_per_kwh = 27  # 円/kWh
+    kwh = watt / 1000 * hours  # kWh
+    cost = kwh * cost_per_kwh  # 円
+    return cost
+
+def calculate_cooking_cost(device_watts_hours):
+    cost_per_kwh = 27  # 円/kWh
+    total_cost = 0
+    for watt, hours in device_watts_hours:
+        kwh = watt / 1000 * hours  # kWh
+        cost = kwh * cost_per_kwh  # 円
+        total_cost += cost
+    return total_cost
+
+st.title('電気代計算アプリ')
+
+# 照明の入力
+st.header('照明')
+lighting_watt = st.number_input('照明のワット数 (W)', min_value=0, value=60)
+lighting_hours = st.number_input('照明の使用時間 (時間)', min_value=0.0, value=5.0)
+lighting_cost = calculate_lighting_cost(lighting_watt, lighting_hours)
+st.write(f'照明の電気代: {lighting_cost}円')
+
+# 調理機器の入力
+st.header('調理機器')
+device_watts_hours = []
+device_watts_hours.append((st.number_input('炊飯器のワット数 (W)', min_value=0, value=700),
+                           st.number_input('炊飯器の使用時間 (時間)', min_value=0.0, value=1.0)))
+device_watts_hours.append((st.number_input('湯沸かしケトルのワット数 (W)', min_value=0, value=1200),
+                           st.number_input('湯沸かしケトルの使用時間 (時間)', min_value=0.0, value=0.5)))
+device_watts_hours.append((st.number_input('オーブンレンジのワット数 (W)', min_value=0, value=1000),
+                           st.number_input('オーブンレンジの使用時間 (時間)', min_value=0.0, value=2.0)))
+cooking_cost = calculate_cooking_cost(device_watts_hours)
+st.write(f'調理機器の合計電気代: {cooking_cost}円')
+
+# 総計
+total_cost = lighting_cost + cooking_cost
+st.write(f'総合計電気代: {total_cost}円')
+
+# 円グラフの表示
+labels = '照明', '調理'
+sizes = [lighting_cost, cooking_cost]
+colors = ['gold', 'lightcoral']
+explode = (0.1, 0)  # 照明部分を少し突き出す
+
+fig, ax = plt.subplots()
+ax.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+        shadow=True, startangle=140)
+ax.axis('equal')  # 円を正しく表示する
+ax.set_title('照明と調理機器の電気代の割合')
+st.pyplot(fig)
